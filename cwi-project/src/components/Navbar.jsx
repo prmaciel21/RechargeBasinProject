@@ -18,8 +18,8 @@ function Navbar() {
     }, []);
 
     return (
-            <header className="bg-white shadow-md">
-                <nav className="p-5 shadow md:flex md:items-center md:justify-between sticky">
+            <header className="bg-white shadow-xl relative z-10">
+                <nav className="p-5 shadow md:flex md:items-center md:justify-between">
                     <div className="flex justify-between items-center">
                         <img className="w-16 inline" src={logo} alt="Fresno State Logo"/>
 
@@ -30,15 +30,15 @@ function Navbar() {
                             {isOpen ? <X /> : <Menu />}
                         </button>
                     </div>
-                    <ul className={`md:flex md:items-center z-[-1] md:z-auto md:static absolute bg-white w-full left-0 md:w-auto md:py-0 py-4 md:pl-0 pl-7 md:opacity-100 opacity-0 top-[-400px] transition-all ease-in duration-100 text-xl ${
+                    <ul className={`md:flex md:items-center z-[-1] md:z-auto md:static absolute bg-white w-full left-0 md:w-auto md:py-0 py-4 md:pl-0 pl-7 md:opacity-100 opacity-0 top-[-400px] transition-all ease-in-out duration-500 text-xl ${
                         isOpen 
-                            ? 'top-[80px] opacity-100 shadow-lg z-10' 
-                            : 'top-[-400px] opacity-0'
+                            ? 'top-[80px] opacity-100 shadow-lg z-40 translate-y-0' 
+                            : 'top-[-400px] opacity-0 -translate-y-5'
                     }`}>
                         <li className="mx-4 my-6 md:my-0">
                             <a 
                                 className="hover:text-gray-100 text-xl"
-                                href=""
+                                href="#problem_solution"
                                 onClick={() => setIsOpen(false)}
                             >
                                 Problem Statement
@@ -47,7 +47,7 @@ function Navbar() {
                         <li className="mx-4 my-6 md:my-0">
                             <a 
                                 className="hover:text-gray-100 text-xl"
-                                href=""
+                                href="#problem_solution"
                                 onClick={() => setIsOpen(false)}
                             >
                                 Solution
@@ -56,16 +56,16 @@ function Navbar() {
                         <li className="mx-4 my-6 md:my-0">
                             <a 
                                 className="hover:text-gray-100 text-xl"
-                                href=""
+                                href="#roi"
                                 onClick={() => setIsOpen(false)}
                             >
-                                ROI Calculator
+                                Find your ROI
                             </a>
                         </li>
                         <li className="mx-4 my-6 md:my-0">
                             <a 
                                 className="hover:text-gray-100 text-xl"
-                                href=""
+                                href="#about"
                                 onClick={() => setIsOpen(false)}
                             >
                                 About

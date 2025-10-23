@@ -1,19 +1,43 @@
 import { useState } from 'react'
 import './App.css'
 import Navbar from './components/Navbar'
+import About from './components/About'
+import backgroundImg from "./components/cwi_project_background.jpg"
+import ROI from './components/ROI.jsx'
 
 function App() {
 
   return (
-    <>
-      <body class="bg-gradient-to-t from-green-100 to-blue-100 min-h-screen">
+      <div className="min-h-body font-[Poppins]">
+
+        {/* Navigation bar */}
         <Navbar />
-        <div class="flex justify-center items-center pt-10 bg-gradient-to-b from-white to-blue-100 m-10 p-10 rounded-4xl shadow-lg">
-          <h1 class="text-3xl ">Central Valley Recharge Basin Project</h1>
-        </div>
-      </body>
-    </>
+
+        <section
+          className='relative h-screen bg-cover bg-center flex flex-col justify-center items-center'
+          style={{ backgroundImage: `url(${backgroundImg})` }}>
+            <div className='relative z-10 text-center px-4'>
+              <h1 class="text-5xl font-bold mb-10">
+                WATER RECHARGE BASIN PROJECT
+              </h1>
+              <p className='text-2xl max-w-2xl mx-auto opacity-90 mb-50'>
+                Advancing water through innovation and research.
+              </p>
+            </div>
+        </section>
+        <main>
+          <section className='relative h-screen bg-cover bg-center flex flex-col justify-center items-center'>
+            <About.ProblemStatement />
+            <About.Solution />
+          </section>
+          <ROI />
+          <About.About />
+        </main>
+        <footer>
+          <div className="bg-white text-center p-4"></div>
+        </footer>
+      </div>
   )
 }
 
-export default App
+export default App;
