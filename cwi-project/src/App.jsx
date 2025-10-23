@@ -3,7 +3,7 @@ import './App.css'
 import Navbar from './components/Navbar'
 import About from './components/About'
 import backgroundImg from "./components/cwi_project_background.jpg"
-import ROI from './components/ROI.jsx'
+import FindYourROI from './components/ROI.jsx'
 
 function App() {
 
@@ -17,7 +17,7 @@ function App() {
           className='relative h-screen bg-cover bg-center flex flex-col justify-center items-center'
           style={{ backgroundImage: `url(${backgroundImg})` }}>
             <div className='relative z-10 text-center px-4'>
-              <h1 class="text-5xl font-bold mb-10">
+              <h1 className="text-5xl font-bold mb-10">
                 WATER RECHARGE BASIN PROJECT
               </h1>
               <p className='text-2xl max-w-2xl mx-auto opacity-90 mb-50'>
@@ -30,7 +30,7 @@ function App() {
             <About.ProblemStatement />
             <About.Solution />
           </section>
-          <ROI />
+          <FindYourROI />
           <About.About />
         </main>
         <footer>
