@@ -1,6 +1,6 @@
-import React from "react";
 import drought from "./drought_img.jpg";
 import cwiBuilding from "./cwi_building.jpeg";
+import rechargeBasin from "./recharge_basin.png";
 import logo from "./california_water_institute_logo.png";
 
 function ProblemStatement() {
@@ -35,7 +35,7 @@ function Solution() {
                 </p>
             </div>
             <div className="md:w-1/2 w-full flex justify-center">
-                <img src={drought} alt="Drought Affected Area" className="rounded-lg w-full h-auto max-w-md object-contain">
+                <img src={rechargeBasin} alt="Drought Affected Area" className="rounded-lg w-full h-auto max-w-md object-contain">
                 </img>
             </div>
         </section>

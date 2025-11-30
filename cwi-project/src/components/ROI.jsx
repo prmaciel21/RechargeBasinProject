@@ -1,4 +1,5 @@
 import { useState } from "react";
+import Map from './Map.jsx';
 
 function FindYourROI() {
   const [acreage, setAcreage] = useState("");
@@ -120,6 +121,8 @@ function FindYourROI() {
           )}
         </div>
       </div>
+      <div className="h-180px"></div>
+      <Map />
     </section>
   );
 }

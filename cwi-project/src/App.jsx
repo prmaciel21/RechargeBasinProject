@@ -1,5 +1,5 @@
-import { useState } from 'react'
 import './App.css'
+import "leaflet/dist/leaflet.css";
 import Navbar from './components/Navbar'
 import About from './components/About'
 import backgroundImg from "./components/cwi_project_background.jpg"
