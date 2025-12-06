@@ -59,7 +59,7 @@ app.get("/soil", async (_req, res) => {
       [-119.7130, 36.7488],
       [-119.7178, 36.7488],
       [-119.7178, 36.7508] // close ring
-
+    ]
     // Build GeoJSON (FeatureCollection is recommended; properties can be used with FILTER later)
     const geojson = {
       type: "FeatureCollection",
@@ -141,7 +141,7 @@ app.get("/soil", async (_req, res) => {
       {
         SERVICE: "report",
         REQUEST: "getreportdata",
-		REPORTID,
+		    REPORTID,
         AOIID,
 		FORMAT: "short"
       },
@@ -161,7 +161,7 @@ app.get("/soil", async (_req, res) => {
       {
         SERVICE: "report",
         REQUEST: "getreport",
-		SHORTFORMDATA: JSON.stringify(REPORTDATA)
+		    SHORTFORMDATA: JSON.stringify(REPORTDATA)
       },
       { headers: { "Content-Type": "application/json" } }
     );

@@ -105,7 +105,7 @@ function FindYourROI() {
           </button>
         </div>
       </div>
-
+      <Map/>
       {/* Results Section */}
       <div className="w-full md:w-1/2 mt-10 md:mt-0 flex justify-center">
         <div className="bg-white shadow-md rounded-xl p-8 w-full max-w-md text-center">
@@ -122,7 +122,6 @@ function FindYourROI() {
         </div>
       </div>
       <div className="h-180px"></div>
-      <Map />
     </section>
   );
 }
