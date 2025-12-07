@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { MapContainer, TileLayer, FeatureGroup} from 'react-leaflet';
 import { EditControl} from 'react-leaflet-draw';
 import 'leaflet-draw/dist/leaflet.draw.css';
@@ -19,6 +19,25 @@ function Map() {
         { id: _leaflet_id, latlngs: layer.getLatLngs()[0] },
       ]);
     };
+
+    const coords = layer.getLatLngs()[0].map( (latlng) => [latlng.lng, latlng.lat] );
+    coords.push(coords[0]); // Close the ring
+    console.log("Coordinates:", coords);
+
+    fetch("http://localhost:5000/soil", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ polygon: coords }),
+    })
+    .then((res) => res.json())
+    .then((data) => {
+      console.log("Soil data received:", data);
+    })
+    .catch((err) => {
+      console.error("Error fetching soil data:", err);
+    });
   };
 
   const onEdit = (e) => {
