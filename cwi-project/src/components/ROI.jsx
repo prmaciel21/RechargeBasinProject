@@ -1,129 +1,209 @@
-import { useState } from "react";
-import Map from './Map.jsx';
+import { useEffect, useState } from "react";
+import Map from "./Map";
 
-function FindYourROI() {
-  const [acreage, setAcreage] = useState("");
-  const [depth, setDepth] = useState("");
-  const [costPerYard, setCostPerYard] = useState("");
-  const [annualBenefitPerAcre, setAnnualBenefitPerAcre] = useState("");
-  const [discountRate, setDiscountRate] = useState(5);
+export default function FindYourROI() {
+  // Basin Geometry Inputs
+  const [insideLength, setInsideLength] = useState("");
+  const [insideWidth, setInsideWidth] = useState("");
+  const [insideSlope, setInsideSlope] = useState("");
+  const [outsideSlope, setOutsideSlope] = useState("");
+  const [topLevee, setTopLevee] = useState("");
+  const [pondSlope, setPondSlope] = useState("");
+  const [freeboard, setFreeboard] = useState("");
+  const [waterDepth, setWaterDepth] = useState("");
+
+  // Soil Inputs
+  const [soil, setSoil] = useState(null); // from Map
+  const [infiltrationRate, setInfiltrationRate] = useState("");
+
+  // Water Availability
+  const [wetFrequency, setWetFrequency] = useState("");
+  const [wetMonths, setWetMonths] = useState("");
+
+  // Development Costs
+  const [landCostPerAcre, setLandCostPerAcre] = useState("");
+  const [pipelineLength, setPipelineLength] = useState("");
+  const [earthworkCostPerYd, setEarthworkCostPerYd] = useState("");
+  const [interestRate, setInterestRate] = useState("");
+  const [loanYears, setLoanYears] = useState("");
+
+  // Water Costs
+  const [waterCost, setWaterCost] = useState("");
+  const [storedWaterValue, setStoredWaterValue] = useState("");
+  const [omCost, setOmCost] = useState("");
+
   const [results, setResults] = useState(null);
 
+  // Receive soil data from Map
+  const handleSoilReceived = (soilObj) => {
+    setSoil(soilObj);
+    if (soilObj?.rate) {
+      setInfiltrationRate(soilObj.rate);
+    }
+  };
+
   const calculateROI = () => {
-    const ACRE_TO_SQFT = 43560;
-    const CUBIC_FEET_TO_YARDS = 1 / 27;
+    // Convert to numbers
+    const L = parseFloat(insideLength);
+    const W = parseFloat(insideWidth);
+    const slope = parseFloat(insideSlope);
+    const depth = parseFloat(waterDepth);
+    const fb = parseFloat(freeboard);
 
-    const volumeCubicYards = acreage * ACRE_TO_SQFT * depth * CUBIC_FEET_TO_YARDS;
+    const totalDepth = depth + fb;
+    const inflatedWidth = W + 2 * slope * totalDepth;
+    const inflatedLength = L + 2 * slope * totalDepth;
 
-    const setupCost = volumeCubicYards * costPerYard;
+    const ACRE_SQFT = 43560;
 
-    const annualBenefit = acreage * annualBenefitPerAcre;
+    const wettedAreaSqFt = inflatedWidth * inflatedLength;
+    const wettedAreaAcres = wettedAreaSqFt / ACRE_SQFT;
 
-    const discountedBenefit = annualBenefit / (1 + discountRate / 100);
+    const earthworkVolumeCuYd =
+      (inflatedWidth * inflatedLength * totalDepth) / 27;
 
-    const roi = ((discountedBenefit - setupCost) / setupCost) * 100;
+    const developmentCost = earthworkVolumeCuYd * parseFloat(earthworkCostPerYd);
+
+    const days = parseFloat(wetMonths) * 30.4;
+    const annualRechargeAF =
+      (parseFloat(infiltrationRate) *
+        wettedAreaSqFt *
+        days) /
+      ACRE_SQFT;
+
+    const annualBenefit =
+      annualRechargeAF * parseFloat(storedWaterValue);
+
+    const roi = ((annualBenefit - developmentCost) / developmentCost) * 100;
 
     setResults({
-      volume: volumeCubicYards.toFixed(0),
-      cost: setupCost.toFixed(2),
+      wettedAreaAcres: wettedAreaAcres.toFixed(2),
+      soil: soil?.symbol,
+      infiltration: infiltrationRate,
+      volume: earthworkVolumeCuYd.toFixed(0),
+      annualRechargeAF: annualRechargeAF.toFixed(2),
+      developmentCost: developmentCost.toFixed(2),
+      annualBenefit: annualBenefit.toFixed(2),
       roi: roi.toFixed(2),
     });
   };
 
   return (
-    <section
-      id="roi"
-      className="flex flex-col md:flex-row items-center justify-between py-16 px-8 md:px-16 bg-gray-50 min-h-screen"
-    >
-      {/* Input Section */}
-      <div className="w-full md:w-1/2 space-y-6">
-        <h2 className="text-2xl font-bold mb-4 text-gray-800">Find Your ROI</h2>
-        <p className="text-gray-600 mb-8">
-          Enter details about your land to estimate the setup cost and return on investment for building a recharge basin.
-        </p>
+  <section className="w-full h-screen overflow-hidden bg-gray-50 flex flex-row">
 
-        <div className="space-y-4">
-          <div>
-            <label className="block text-gray-700 font-medium mb-2">Basin Area (acres)</label>
-            <input
-              type="number"
-              value={acreage}
-              onChange={(e) => setAcreage(e.target.value)}
-              className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-400"
-              placeholder="e.g., 40"
-            />
-          </div>
+    {/* LEFT PANEL — Inputs */}
+    <div className="w-[30%] h-full overflow-y-auto px-6 py-4 space-y-6 border-r border-gray-300 bg-white">
+      <h1 className="text-2xl font-bold">Find Your ROI</h1>
 
-          <div>
-            <label className="block text-gray-700 font-medium mb-2">Average Basin Depth (feet)</label>
-            <input
-              type="number"
-              value={depth}
-              onChange={(e) => setDepth(e.target.value)}
-              className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-400"
-              placeholder="e.g., 6"
-            />
-          </div>
+      <div className="space-y-6">
 
-          <div>
-            <label className="block text-gray-700 font-medium mb-2">Excavation Cost per Cubic Yard ($)</label>
-            <input
-              type="number"
-              value={costPerYard}
-              onChange={(e) => setCostPerYard(e.target.value)}
-              className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-400"
-              placeholder="e.g., 12"
-            />
-          </div>
+        <InputSection title="Basin Size & Design">
+          <Input label="Inside Length (ft)" setter={setInsideLength}  />
+          <Input label="Inside Width (ft)" setter={setInsideWidth} />
+          <Input label="Inside Slopes (H:1)" setter={setInsideSlope} />
+          <Input label="Outside Slopes (H:1)" setter={setOutsideSlope} />
+          <Input label="Top of Levee (ft)" setter={setTopLevee} />
+          <Input label="Slope Across Pond (ft)" setter={setPondSlope} />
+          <Input label="Freeboard (ft)" setter={setFreeboard} />
+          <Input label="Water Depth (ft)" setter={setWaterDepth} />
+        </InputSection>
 
-          <div>
-            <label className="block text-gray-700 font-medium mb-2">Annual Water Benefit per Acre ($)</label>
-            <input
-              type="number"
-              value={annualBenefitPerAcre}
-              onChange={(e) => setAnnualBenefitPerAcre(e.target.value)}
-              className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-400"
-              placeholder="e.g., 1000"
-            />
-          </div>
+        <InputSection title="Soil Data (from Map)">
+          <p className="text-sm text-gray-700">
+            {soil ? `${soil.symbol} - ${soil.desc}` : "Draw polygon on map"}
+          </p>
+          <Input label="Infiltration Rate (ft/day)" setter={setInfiltrationRate} />
+        </InputSection>
 
-          <div>
-            <label className="block text-gray-700 font-medium mb-2">Discount Rate (%)</label>
-            <input
-              type="number"
-              value={discountRate}
-              onChange={(e) => setDiscountRate(e.target.value)}
-              className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-400"
-            />
-          </div>
+        <InputSection title="Water Availability">
+          <Input label="Wet Year Frequency (%)" setter={setWetFrequency} />
+          <Input label="Wet Season Duration (months)" setter={setWetMonths} />
+        </InputSection>
 
-          <button
-            onClick={calculateROI}
-            className="mt-4 bg-blue-600 text-white font-semibold py-3 px-6 rounded-lg hover:bg-blue-700 transition duration-300"
-          >
-            Calculate
-          </button>
-        </div>
+        <InputSection title="Development Costs">
+          <Input label="Land Cost ($/acre)" setter={setLandCostPerAcre} />
+          <Input label="Pipeline Length (ft)" setter={setPipelineLength} />
+          <Input label="Earthwork Cost ($/yd³)" setter={setEarthworkCostPerYd} />
+          <Input label="Interest Rate (%)" setter={setInterestRate} />
+          <Input label="Loan Term (years)" setter={setLoanYears} />
+        </InputSection>
+
+        <InputSection title="Water Costs">
+          <Input label="Cost of Recharge Water ($/AF)" setter={setWaterCost} />
+          <Input label="Value of Stored Water ($/AF)" setter={setStoredWaterValue} />
+          <Input label="O&M Cost ($/AF)" setter={setOmCost} />
+        </InputSection>
+
+        <button
+          onClick={calculateROI}
+          className="w-full bg-blue-600 text-white font-semibold py-2 rounded-md hover:bg-blue-700"
+        >
+          Calculate ROI
+        </button>
+
       </div>
-      <Map/>
-      {/* Results Section */}
-      <div className="w-full md:w-1/2 mt-10 md:mt-0 flex justify-center">
-        <div className="bg-white shadow-md rounded-xl p-8 w-full max-w-md text-center">
-          <h3 className="text-xl font-semibold mb-4 text-gray-800">Estimated Results</h3>
-          {results ? (
-            <>
-              <p className="text-gray-600 mb-2">Earthwork Volume: <span className="font-semibold">{results.volume}</span> yd³</p>
-              <p className="text-gray-600 mb-2">Setup Cost: <span className="font-semibold">${results.cost}</span></p>
-              <p className="text-gray-600 mb-2">ROI: <span className={`font-bold ${results.roi >= 0 ? "text-green-600" : "text-red-600"}`}>{results.roi}%</span></p>
-            </>
-          ) : (
-            <p className="text-gray-500">Enter your land details and click “Calculate”</p>
-          )}
+    </div>
+
+    <Map onSoilResult={handleSoilReceived} />
+
+    {/* RIGHT PANEL — Results */}
+    <div className="w-[30%] h-full px-6 py-8 bg-white border-l border-gray-300">
+      <h2 className="text-xl font-semibold mb-4 text-center">Estimated Results</h2>
+
+      {results ? (
+        <div className="space-y-2 text-sm">
+          <Result label="Soil" value={results.soil || "N/A"} />
+          <Result label="Infiltration Rate" value={results.infiltration ? `${results.infiltration} ft/day` : "N/A"} />
+          <Result label="Basin Area" value={`${results.wettedAreaAcres} acres`} />
+          <Result label="Excavation Volume" value={`${results.volume} yd³`} />
+          <Result label="Annual Recharge" value={`${results.annualRechargeAF} AF/year`} />
+          <Result label="Setup Cost" value={`$${results.developmentCost}`} />
+          <Result label="Annual Benefit" value={`$${results.annualBenefit}`} />
+          <Result
+            label="ROI"
+            value={`${results.roi}%`}
+            highlight={true}
+            positive={parseFloat(results.roi) >= 0}
+          />
         </div>
-      </div>
-      <div className="h-180px"></div>
-    </section>
+      ) : (
+        <p className="text-center text-gray-500">Enter values to calculate.</p>
+      )}
+    </div>
+  </section>
+);
+function InputSection({ title, children }) {
+  return (
+    <div className="border rounded-md p-3 bg-gray-50">
+      <p className="font-semibold text-sm mb-2">{title}</p>
+      <div className="space-y-2">{children}</div>
+    </div>
   );
 }
 
-export default FindYourROI;
+function Input({ label, setter }) {
+  return (
+    <div className="flex flex-col gap-1">
+      <label className="text-xs font-medium text-gray-700">{label}</label>
+      <input
+        type="number"
+        onChange={(e) => setter(e.target.value)}
+        className="px-2 py-1 text-sm border rounded"
+      />
+    </div>
+  );
+}
+
+
+function Result({ label, value, highlight, positive }) {
+  return (
+    <p>
+      <strong>{label}: </strong>
+      <span className={highlight ? (positive ? "text-green-600" : "text-red-600") : ""}>
+        {value}
+      </span>
+    </p>
+  );
+}
+
+}

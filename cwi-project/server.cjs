@@ -4,8 +4,33 @@ const cors = require("cors");
 const xml2js = require("xml2js");
 
 const app = express();
-app.use(express.json());
 app.use(cors());
+app.use(express.json());
+
+app.options("/soil", (req, res) => {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Methods", "POST, OPTIONS");
+  res.header("Access-Control-Allow-Headers", "Content-Type");
+  res.sendStatus(200);
+});
+
+
+function inferInfiltrationRate(desc) {
+  if (!desc) return 0.4;
+  const d = desc.toLowerCase();
+
+  if (d.includes("gravel")) return 1;
+  if (d.includes("sand")) return 1;
+  if (d.includes("coarse")) return 1.2;
+  if (d.includes("loamy sand")) return 0.5;
+  if (d.includes("sandy loam")) return 0.8;
+  if (d.includes("fine sandy loam")) return 0.7;
+  if (d.includes("loam")) return 0.6;
+  if (d.includes("clay")) return 0.4;
+  if (d.includes("silt")) return 0.4;
+
+  return 0.4; // conservative fallback
+}
 
 function parseAndSortSoils(reportJSON) {
   try {
@@ -46,11 +71,12 @@ function parseAndSortSoils(reportJSON) {
   }
 }
 
-app.get("/", (_req, res) => res.send("Soil API running"));
+app.get("/soil", (req, res) => res.send("Soil API running"));
 
-app.post("/soil", async (_req, res) => {
+app.post("/soil", async (req, res) => {
+
   try {
-    const coords = req.body.coords;
+    const coords = req.body.polygon;
     if (!coords || !Array.isArray(coords) || coords.length < 4) {
       return res.status(400).json({ error: "Invalid polygon coordinates" });
     }
@@ -185,6 +211,11 @@ app.post("/soil", async (_req, res) => {
 	// Parse the JSON into a usable object (seperate symbol from its description)
 	const soils = parseAndSortSoils(REPORTJSON);
 	
+  const dominant = soils[0];
+  const infiltrationRate = inferInfiltrationRate(dominant.desc);
+
+  console.log("Dominant soil:", dominant, "Infiltration:", infiltrationRate);
+
 	// Return successful with the symbol of the most prolific soil type
 	return res.status(200).json(soils[0].symbol);
 
@@ -198,6 +229,7 @@ app.post("/soil", async (_req, res) => {
   }
 });
 
-// Begin lisining on port 5000 and report server running
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log("Server running on port ${PORT}"));
+// Begin listening on port 5000 and report server running
+app.listen(3000, () => console.log("Server running on port 3000"));
+console.log("Booting server...");
+

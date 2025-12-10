@@ -1,12 +1,13 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef} from 'react';
 import { MapContainer, TileLayer, FeatureGroup} from 'react-leaflet';
 import { EditControl} from 'react-leaflet-draw';
 import 'leaflet-draw/dist/leaflet.draw.css';
 import 'leaflet/dist/leaflet.css';
 
-function Map() {
+function Map({ onSoilResult }) {
   const mapRef = useRef();
   const [drawnItems, setDrawnItems] = useState([]);
+  const [soilType, setSoilType] = useState(null);
 
   const onCreate = (e) => {
     console.log("Created:", e.layer.getLatLngs()[0]);
@@ -24,47 +25,36 @@ function Map() {
     coords.push(coords[0]); // Close the ring
     console.log("Coordinates:", coords);
 
-    fetch("http://localhost:5000/soil", {
+    fetch("/soil", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({ polygon: coords }),
     })
-    .then((res) => res.json())
-    .then((data) => {
-      console.log("Soil data received:", data);
-    })
+    .then((res) => {
+        if (!res.ok) {
+          throw new Error(`Server error ${res.status}`);
+        }
+        return res.json();
+      })
+      .then((data) => {
+        console.log("Soil data received:", data);
+        if (onSoilResult) {
+          onSoilResult(data); // send {symbol, desc, infiltrationRate,...} up
+        }
+      })
     .catch((err) => {
       console.error("Error fetching soil data:", err);
     });
   };
 
-  const onEdit = (e) => {
-    console.log("Edited:", e);
-    const {layers: {_layers}} = e;
-
-    Object.values(_layers).map( ({ _leaflet_id, editing }) => {
-      setDrawnItems( (layers) => 
-        layers.map( (l) => l.id === _leaflet_id) 
-      ? {...l, latlngs: { ...editing.latlngs[0] }} 
-      : l 
-      );
-    });
-  };
-
-  const onDelete = (e) => {
-    console.log("Deleted:", e);
-    const {layers : {_layers}} = e;
-
-    Object.values(_layers).map(({_leaflet_id}) => {
-      setDrawnItems( (layers) => layers.filter( (l) => l.id !== _leaflet_id ) );
-    });
-  };
+  const onEdit = () => {};
+  const onDelete = () => {};
 
   return (
     <div>
-      <MapContainer center={[36.7378, -119.7871]} zoom={12} ref={mapRef} className='h-90 w-90'>
+      <MapContainer center={[36.7378, -119.7871]} zoom={12} ref={mapRef} className='h-120 w-150'>
         <FeatureGroup>
           <EditControl
             position="topright"
